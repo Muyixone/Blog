@@ -1,5 +1,6 @@
 const express = require('express');
 const ejs = require('ejs');
+const mongoose = require('mongoose');
 
 const path = require('path');
 
@@ -26,3 +27,5 @@ app.get('/post', (req, res, next) => {
 app.listen(port, (req, res) => {
   console.log('Server connected on port', port);
 });
+
+mongoose.connect('mongodb://localhost:27017/Blog', { useNewUrlParser: true });
