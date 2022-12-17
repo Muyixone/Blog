@@ -17,8 +17,9 @@ app.set('view engine', 'ejs');
 
 const port = 3333;
 
-app.get('/', (req, res, next) => {
-  res.render('index');
+app.get('/', async (req, res, next) => {
+  const blogPosts = await BlogPost.find({});
+  res.render('index', { blogPosts });
 });
 app.get('/about', (req, res, next) => {
   res.render('about');
@@ -26,15 +27,25 @@ app.get('/about', (req, res, next) => {
 app.get('/contact', (req, res, next) => {
   res.render('contact');
 });
-app.get('/post', (req, res, next) => {
-  res.render('post');
+
+/*
+ * GET /blog
+ * GET  single blog post
+ */
+app.get('/post/:id', async (req, res, next) => {
+  const id = req.params.id;
+  const blogPost = await BlogPost.findById(id);
+  res.render('post', { blogPost });
 });
-app.get('/post/new', (req, res, next) => {
+
+app.get('/posts/new', (req, res, next) => {
   res.render('create');
 });
-app.post('/post/store', async (req, res, next) => {
+
+app.post('/posts/store', async (req, res, next) => {
   let body = req.body;
   await BlogPost.create(body);
+  res.redirect('/');
 });
 app.listen(port, (req, res) => {
   console.log('Server connected on port', port);
