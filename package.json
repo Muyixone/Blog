@@ -25,6 +25,7 @@
     "mongoose": "^6.7.5"
   },
   "devDependencies": {
+    "express-fileupload": "^1.4.0",
     "nodemon": "^2.0.20"
   }
 }

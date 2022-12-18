@@ -25,9 +25,8 @@
           <div class="col-md-10 col-lg-8 col-xl-7">
             <div class="my-5">
               
-              <form id="contactForm" data-sb-form-api-token="API_TOKEN" action="/posts/store" method="post">
+              <form id="contactForm" data-sb-form-api-token="API_TOKEN" action="/posts/store" method="post" enctype="multipart/form-data">
                 <div class="form-floating">
-                  
                   <input
                     class="form-control"
                     id="title"
@@ -36,13 +35,18 @@
                     <label for="title">Title</label>                   
                 </div>           
                 <div class="form-floating">
-                  
                   <textarea
                     class="form-control"
                     id="body" name="body"
                     rows="5"></textarea> 
                     <label for="body">Description</label>                          
                 </div>
+                <div class="form-floating">
+                  <input type="file"
+                    class="form-control"
+                    id="image" name="image" placeholder="Image"/>                                             
+                </div>
+
                 <br />                               
                 <!-- Submit Button-->
                 <button
