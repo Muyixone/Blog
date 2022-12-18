@@ -7,6 +7,7 @@ const expressFileUpload = require('express-fileupload');
 const path = require('path');
 
 const BlogPost = require('./models/blogpost');
+const { render } = require('express/lib/response');
 
 const app = express();
 
@@ -15,6 +16,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(expressFileUpload());
+
+//Validation middleware
+const validateMiddleware = (req, res, next) => {
+  if (req.files === null || req.body.name === null || req.body.title === null) {
+    return res.redirect('/posts/new');
+  }
+  next();
+};
+app.use('/posts/store', validateMiddleware);
 
 app.set('view engine', 'ejs');
 
