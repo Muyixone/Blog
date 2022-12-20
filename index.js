@@ -4,10 +4,11 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const expressFileUpload = require('express-fileupload');
 
-const path = require('path');
-
-const BlogPost = require('./models/blogpost');
-const { render } = require('express/lib/response');
+const newPostController = require('./controller/controller.newPost');
+const indexController = require('./controller/controller.index');
+const contactController = require('./controller/controller.contact');
+const aboutController = require('./controller/controller.about');
+const validateMiddleware = require('./middleware/validateMiddleware');
 
 const app = express();
 
@@ -16,78 +17,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(expressFileUpload());
-
-//Validation middleware
-const validateMiddleware = (req, res, next) => {
-  if (req.files === null || req.body.name === null || req.body.title === null) {
-    return res.redirect('/posts/new');
-  }
-  next();
-};
 app.use('/posts/store', validateMiddleware);
 
 app.set('view engine', 'ejs');
 
 const port = 3333;
 
-/*
- * GET / the home page
- * GET  all posts from the database
- */
-app.get('/', async (req, res, next) => {
-  const blogPosts = await BlogPost.find({});
-  res.render('index', { blogPosts });
-});
+app.get('/', indexController.getHomePage); // used the dot notation to call the about controller cos of the method of export used in the controller folder
+app.get('/about', aboutController);
+app.get('/contact', contactController);
+app.get('/post/:id', indexController.getPostById);
+app.get('/posts/new', newPostController.getCreatePage);
+app.post('/posts/store', newPostController.postBlog);
 
-/*
- * GET /about page
- *
- */
-app.get('/about', (req, res, next) => {
-  res.render('about');
-});
-
-/*
- * GET /contact page
- *
- */
-app.get('/contact', (req, res, next) => {
-  res.render('contact');
-});
-
-/*
- * GET /post/:id
- * GET  single blog post byits id
- */
-app.get('/post/:id', async (req, res, next) => {
-  const id = req.params.id;
-  const blogPost = await BlogPost.findById(id);
-  res.render('post', { blogPost });
-});
-
-/*
- * GET /posts/new
- * Get's the page to create a new blog post
- */
-app.get('/posts/new', (req, res, next) => {
-  res.render('create');
-});
-
-/*
- * POST /posts/store
- * Create's a new blog post
- */
-app.post('/posts/store', async (req, res, next) => {
-  let body = req.body;
-  let image = req.files.image;
-  image.mv(path.resolve(__dirname, 'public/img', image.name), async (err) => {
-    await BlogPost.create({
-      ...body, //Used a spread operator, cos the site cratches without it
-      image: '/img/' + image.name,
-    });
-    res.redirect('/');
-  });
-});
 app.listen(port, (req, res) => {
   console.log('Server connected on port', port);
 });
