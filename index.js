@@ -8,6 +8,10 @@ const newPostController = require('./controller/controller.newPost');
 const indexController = require('./controller/controller.index');
 const contactController = require('./controller/controller.contact');
 const aboutController = require('./controller/controller.about');
+const newUSerController = require('./controller/controller.newUSer');
+const storeUsersController = require('./controller/controller.storeUser');
+const loginController = require('./controller/controller.login');
+const userLoginController = require('./controller/controller.loginUser');
 const validateMiddleware = require('./middleware/validateMiddleware');
 
 const app = express();
@@ -29,6 +33,10 @@ app.get('/contact', contactController);
 app.get('/post/:id', indexController.getPostById);
 app.get('/posts/new', newPostController.getCreatePage);
 app.post('/posts/store', newPostController.postBlog);
+app.get('/auth/register', newUSerController);
+app.get('/auth/login', loginController);
+app.post('/users/register', storeUsersController);
+app.post('/users/login', userLoginController);
 
 app.listen(port, (req, res) => {
   console.log('Server connected on port', port);
