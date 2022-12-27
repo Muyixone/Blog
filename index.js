@@ -3,6 +3,8 @@ const ejs = require('ejs');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const expressFileUpload = require('express-fileupload');
+const expressSession = require('express-session');
+require('dotenv').config();
 
 const newPostController = require('./controller/controller.newPost');
 const indexController = require('./controller/controller.index');
@@ -22,6 +24,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(expressFileUpload());
 app.use('/posts/store', validateMiddleware);
+app.use(
+  expressSession({
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 app.set('view engine', 'ejs');
 

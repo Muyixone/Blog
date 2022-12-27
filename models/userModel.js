@@ -12,7 +12,7 @@ const userSchema = new Schema({
 userSchema.pre('save', function (next) {
   const user = this;
 
-  bcrypt.hash('user.password', saltRounds, (err, hash) => {
+  bcrypt.hash(user.password, saltRounds, (err, hash) => {
     user.password = hash;
     next();
   });

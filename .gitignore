@@ -1,3 +1,4 @@
 node_modules
 startbootstrap-clean-blog-gh-pages
 test.js
+.env

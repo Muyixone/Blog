@@ -6,6 +6,7 @@ const BlogPost = require('../models/blogpost');
  */
 exports.getHomePage = async (req, res, next) => {
   const blogPosts = await BlogPost.find({});
+  console.log(req.session);
   res.render('index', { blogPosts });
 };
 
