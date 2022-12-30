@@ -15,6 +15,9 @@ const storeUsersController = require('./controller/controller.storeUser');
 const loginController = require('./controller/controller.login');
 const userLoginController = require('./controller/controller.loginUser');
 const validateMiddleware = require('./middleware/validateMiddleware');
+const authenticationMiddleware = require('./middleware/authMiddleware');
+const redirectIfAuthMiddleware = require('./middleware/redirectIfAuthMiddleware');
+const logoutController = require('./controller/controller.logout');
 
 const app = express();
 
@@ -40,12 +43,30 @@ app.get('/', indexController.getHomePage); // used the dot notation to call the 
 app.get('/about', aboutController);
 app.get('/contact', contactController);
 app.get('/post/:id', indexController.getPostById);
-app.get('/posts/new', newPostController.getCreatePage);
-app.post('/posts/store', newPostController.postBlog);
-app.get('/auth/register', newUSerController);
-app.get('/auth/login', loginController);
-app.post('/users/register', storeUsersController);
-app.post('/users/login', userLoginController);
+app.get(
+  '/posts/new',
+  authenticationMiddleware,
+  newPostController.getCreatePage
+);
+app.post('/posts/store', authenticationMiddleware, newPostController.postBlog);
+app.get('/auth/register', redirectIfAuthMiddleware, newUSerController);
+app.get('/auth/login', redirectIfAuthMiddleware, loginController);
+app.post('/users/register', redirectIfAuthMiddleware, storeUsersController);
+app.post('/users/login', redirectIfAuthMiddleware, userLoginController);
+app.get('/auth/logout', logoutController);
+app.use((req, res, next) => {
+  res.render('notfound');
+});
+
+//Global middleware
+//checks if a user is logged to determine what to render in the nav bar
+global.loggedIn = null;
+
+app.use('*', (req, res, next) => {
+  loggedIn = req.session.userId;
+
+  next();
+});
 
 app.listen(port, (req, res) => {
   console.log('Server connected on port', port);

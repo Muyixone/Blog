@@ -6,7 +6,7 @@ const path = require('path');
  * Get's the page to create a new blog post
  */
 exports.getCreatePage = (req, res, next) => {
-  //check if the session contains the userid before displaying the create new post page
+  //check if the session contains the userId before displaying the create new post page
   if (req.session.userId) {
     return res.render('create');
   }

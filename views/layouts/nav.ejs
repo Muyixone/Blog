@@ -24,6 +24,13 @@
         <li class="nav-item">
           <a class="nav-link px-lg-3 py-3 py-lg-4" href="/post">Sample Post</a>
         </li>
+        <% if (loggedIn) { %>
+        <li class="nav-item">
+          <a class="nav-link px-lg-3 py-3 py-lg-4" href="/posts/new"
+            >New Post</a
+          >
+        </li>
+        <% } %> <% if (!loggedIn) { %>
         <li class="nav-item">
           <a class="nav-link px-lg-3 py-3 py-lg-4" href="/auth/login">Login</a>
         </li>
@@ -32,14 +39,17 @@
             >New User</a
           >
         </li>
+        <% } %>
         <li class="nav-item">
           <a class="nav-link px-lg-3 py-3 py-lg-4" href="/contact">Contact</a>
         </li>
+        <% if (loggedIn) { %>
         <li class="nav-item">
-          <a class="nav-link px-lg-3 py-3 py-lg-4" href="/posts/new"
-            >New Post</a
+          <a class="nav-link px-lg-3 py-3 py-lg-4" href="/auth/logout"
+            >Logout</a
           >
         </li>
+        <% } %>
       </ul>
     </div>
   </div>

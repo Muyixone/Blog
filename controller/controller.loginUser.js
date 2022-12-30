@@ -9,7 +9,6 @@ module.exports = (req, res, next) => {
       return res.status(400).redirect('/auth/login');
     }
     bcrypt.compare(password, user.password, (err, result) => {
-      console.log(password, user.password);
       if (err) {
         return res.status(400).redirect('/auth/login');
       }
