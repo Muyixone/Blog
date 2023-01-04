@@ -14,6 +14,7 @@ module.exports = (req, res, next) => {
       }
       if (result) {
         req.session.userId = user._id;
+
         return res.status(200).redirect('/');
       } else {
         return res.status(401).redirect('/auth/login');

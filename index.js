@@ -4,11 +4,11 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const expressFileUpload = require('express-fileupload');
 const expressSession = require('express-session');
+const flash = require('connect-flash');
 require('dotenv').config();
 
 const newPostController = require('./controller/controller.newPost');
 const indexController = require('./controller/controller.index');
-const contactController = require('./controller/controller.contact');
 const aboutController = require('./controller/controller.about');
 const newUSerController = require('./controller/controller.newUSer');
 const storeUsersController = require('./controller/controller.storeUser');
@@ -31,17 +31,28 @@ app.use(
   expressSession({
     secret: process.env.SECRET_KEY,
     resave: false,
+    cookie: { maxAge: 1000 * 60 * 60 },
     saveUninitialized: true,
   })
 );
+//flash middleware helps flush away error notifications at the end of every request live-
+//cyle, whenever the user re-visits the forma after a successful submission
+app.use(flash());
 
+//Global middleware
+//checks if a user is logged in to determine what to render in the nav bar
+global.loggedIn = null;
+app.use('*', (req, res, next) => {
+  loggedIn = req.session.userId;
+
+  next();
+});
 app.set('view engine', 'ejs');
 
 const port = 3333;
 
 app.get('/', indexController.getHomePage); // used the dot notation to call the about controller cos of the method of export used in the controller folder
 app.get('/about', aboutController);
-app.get('/contact', contactController);
 app.get('/post/:id', indexController.getPostById);
 app.get(
   '/posts/new',
@@ -56,16 +67,6 @@ app.post('/users/login', redirectIfAuthMiddleware, userLoginController);
 app.get('/auth/logout', logoutController);
 app.use((req, res, next) => {
   res.render('notfound');
-});
-
-//Global middleware
-//checks if a user is logged to determine what to render in the nav bar
-global.loggedIn = null;
-
-app.use('*', (req, res, next) => {
-  loggedIn = req.session.userId;
-
-  next();
 });
 
 app.listen(port, (req, res) => {
