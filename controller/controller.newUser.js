@@ -1,14 +1,18 @@
 module.exports = (req, res, next) => {
-  let { username, password } = '';
+  let { firstname, lastname, email, password } = '';
   const data = req.flash('data')[0];
   if (typeof data != 'undefined') {
-    username = data.username;
+    firstname = data.firstname;
+    lastname = data.lastname;
+    email = data.email;
     password = data.password;
   }
   res.render('register', {
     // errors: req.session.validationErrors,
     errors: req.flash('validationErrors'),
-    username,
+    firstname,
+    lastname,
+    email,
     password,
   });
 };

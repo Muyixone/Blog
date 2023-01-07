@@ -2,21 +2,26 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
 module.exports = (req, res, next) => {
-  const { username, password } = req.body;
-  User.findOne({ username }).then((user) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).then((user) => {
     if (!user) {
       //check if user is in the database
-      return res.status(400).redirect('/auth/login');
+
+      return res.status(400).redirect('/auth/login', {
+        message: 'User not found.',
+      });
     }
     bcrypt.compare(password, user.password, (err, result) => {
       if (err) {
+        console.log({ message: 'an error occured' });
         return res.status(400).redirect('/auth/login');
       }
       if (result) {
         req.session.userId = user._id;
-
-        return res.status(200).redirect('/');
+        console.log({ message: 'log in successful' });
+        return res.redirect('/');
       } else {
+        console.log({ message: 'log in not successful' });
         return res.status(401).redirect('/auth/login');
       }
     });

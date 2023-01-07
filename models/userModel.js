@@ -6,11 +6,17 @@ const saltRounds = 10; //It determines the number of times the password will be 
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  username: {
+  firstname: {
     type: String,
     unique: true,
-    required: [true, 'please provide a username'],
+    required: [true, 'please provide a firstname'],
   },
+  lastname: {
+    type: String,
+    unique: true,
+    required: [true, 'please provide a lastname'],
+  },
+  email: { type: String, required: true },
   password: { type: String, required: [true, 'please provide a password'] },
 });
 

@@ -5,18 +5,13 @@ const bodyParser = require('body-parser');
 const expressFileUpload = require('express-fileupload');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
+const createError = require('http-errors');
 require('dotenv').config();
 
-const newPostController = require('./controller/controller.newPost');
-const indexController = require('./controller/controller.index');
-const aboutController = require('./controller/controller.about');
-const newUSerController = require('./controller/controller.newUSer');
-const storeUsersController = require('./controller/controller.storeUser');
-const loginController = require('./controller/controller.login');
-const userLoginController = require('./controller/controller.loginUser');
+const createBlogRoute = require('./routes/routes.Blog');
+const usersRoute = require('./routes/route.User');
 const validateMiddleware = require('./middleware/validateMiddleware');
-const authenticationMiddleware = require('./middleware/authMiddleware');
-const redirectIfAuthMiddleware = require('./middleware/redirectIfAuthMiddleware');
+
 const logoutController = require('./controller/controller.logout');
 
 const app = express();
@@ -39,33 +34,48 @@ app.use(
 //cyle, whenever the user re-visits the forma after a successful submission
 app.use(flash());
 
+app.set('view engine', 'ejs');
+
 //Global middleware
 //checks if a user is logged in to determine what to render in the nav bar
+//if user is logged in then display the logout and create blog buttons in the nav bar
+//else display the login and create new user buttons
 global.loggedIn = null;
 app.use('*', (req, res, next) => {
   loggedIn = req.session.userId;
 
   next();
 });
-app.set('view engine', 'ejs');
 
 const port = 3333;
 
-app.get('/', indexController.getHomePage); // used the dot notation to call the about controller cos of the method of export used in the controller folder
-app.get('/about', aboutController);
-app.get('/post/:id', indexController.getPostById);
-app.get(
-  '/posts/new',
-  authenticationMiddleware,
-  newPostController.getCreatePage
-);
-app.post('/posts/store', authenticationMiddleware, newPostController.postBlog);
-app.get('/auth/register', redirectIfAuthMiddleware, newUSerController);
-app.get('/auth/login', redirectIfAuthMiddleware, loginController);
-app.post('/users/register', redirectIfAuthMiddleware, storeUsersController);
-app.post('/users/login', redirectIfAuthMiddleware, userLoginController);
+app.use(createBlogRoute);
+app.use(usersRoute);
+
+// app.use(createBlogRoute);
+// app.use('/about', createBlogRoute);
+// //display about page here
+// app.use('/post', createBlogRoute);
+// app.use('/posts', createBlogRoute);
+// app.use('/auth', usersRoute);
+
+// app.use('/users', usersRoute);
+
 app.get('/auth/logout', logoutController);
+
+//Catch 404 and forward to error handler
 app.use((req, res, next) => {
+  next(createError(404));
+});
+
+//error handler
+app.use((err, req, res, next) => {
+  //set locals, only providing error in development mode
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') == 'development' ? err : {};
+
+  //render the error page
+  res.status(err.status || 500);
   res.render('notfound');
 });
 
@@ -74,3 +84,5 @@ app.listen(port, (req, res) => {
 });
 
 mongoose.connect('mongodb://localhost:27017/Blog', { useNewUrlParser: true });
+
+module.exports = app;
