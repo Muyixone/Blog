@@ -1,3 +1,7 @@
+// module.exports = (req, res, next) => {
+//   res.render('register');
+// };
+
 module.exports = (req, res, next) => {
   let { firstname, lastname, email, password } = '';
   const data = req.flash('data')[0];

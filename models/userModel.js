@@ -8,15 +8,19 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
   firstname: {
     type: String,
-    unique: true,
     required: [true, 'please provide a firstname'],
   },
   lastname: {
     type: String,
-    unique: true,
     required: [true, 'please provide a lastname'],
   },
-  email: { type: String, required: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
+  },
   password: { type: String, required: [true, 'please provide a password'] },
 });
 
@@ -29,5 +33,13 @@ userSchema.pre('save', function (next) {
     next();
   });
 });
+
+// Confirm if the user trying to log in has the correct credentials
+// userSchema.methods.isValidPassword = async function (password) {
+//   const user = this;
+//   const compare = await bcrypt.compare(password, user.password);
+
+//   return compare;
+// };
 
 module.exports = mongoose.model('User', userSchema);

@@ -6,60 +6,59 @@ const expressFileUpload = require('express-fileupload');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
 const createError = require('http-errors');
+const passport = require('passport');
 require('dotenv').config();
 
 const createBlogRoute = require('./routes/routes.Blog');
 const usersRoute = require('./routes/route.User');
 const validateMiddleware = require('./middleware/validateMiddleware');
 
+//require('./middleware/auth');
+
 const logoutController = require('./controller/controller.logout');
 
 const app = express();
 
 //Middleware
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(bodyParser.json());
+
+//app.use(express.static('public'));
 app.use(expressFileUpload());
 app.use('/posts/store', validateMiddleware);
-app.use(
-  expressSession({
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    cookie: { maxAge: 1000 * 60 * 60 },
-    saveUninitialized: true,
-  })
-);
+// app.use(
+//   expressSession({
+//     secret: process.env.SECRET_KEY,
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 //flash middleware helps flush away error notifications at the end of every request live-
-//cyle, whenever the user re-visits the forma after a successful submission
+//cyle, whenever the user re-visits the form after a successful submission
 app.use(flash());
 
-app.set('view engine', 'ejs');
+//app.set('view engine', 'ejs');
 
 //Global middleware
 //checks if a user is logged in to determine what to render in the nav bar
 //if user is logged in then display the logout and create blog buttons in the nav bar
 //else display the login and create new user buttons
-global.loggedIn = null;
-app.use('*', (req, res, next) => {
-  loggedIn = req.session.userId;
+// global.loggedIn = null;
+// app.use('*', (req, res, next) => {
+//   loggedIn = req.session.userId;
 
-  next();
-});
+//   next();
+// });
 
 const port = 3333;
 
-app.use(createBlogRoute);
-app.use(usersRoute);
+app.use('/blog', createBlogRoute);
 
-// app.use(createBlogRoute);
-// app.use('/about', createBlogRoute);
-// //display about page here
-// app.use('/post', createBlogRoute);
-// app.use('/posts', createBlogRoute);
-// app.use('/auth', usersRoute);
+app.use('/users', usersRoute);
 
-// app.use('/users', usersRoute);
+app.get('/', (req, res, next) => {
+  res.status(200).json({ message: "Welcome to Learners' Blog" });
+});
 
 app.get('/auth/logout', logoutController);
 

@@ -15,7 +15,8 @@ const validateBlogPostMiddleware = async (req, res, next) => {
 const blogValidator = joi.object({
   title: joi.string().min(5).max(255).required(),
   body: joi.string().min(10).required(),
-  username: joi.string().alphanum().min(3),
+  firstname: joi.string().alphanum().min(3),
+  lastname: joi.string().alphanum().min(3),
   datePosted: joi.date().default(Date.now()),
   image: joi.string(),
 });
