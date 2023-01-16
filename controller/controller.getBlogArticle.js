@@ -1,6 +1,7 @@
 const blogModel = require('../models/blogpost');
 
 exports.getArticles = async (req, res, next) => {
+    //Find all posts and sort them by datePosted from the most recent 
   const article = await blogModel.find({}).sort({ datePosted: 'desc' });
   return res.status(200).json({
     statusCode: 200,

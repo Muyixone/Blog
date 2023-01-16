@@ -8,6 +8,8 @@ const authenticationMiddleware = require('../middleware/authMiddleware');
 const validateBlogpostMiddleware = require('../middleware/validateBlogPost');
 const createBlog = require('../controller/controller.createBlog');
 const getBlog = require('../controller/controller.getBlogArticle');
+const updateBlog = require('../controller/controller.updateBlog');
+const deleteBlog = require('../controller/controller.deleteBlog');
 
 /*
  * GET /blog
@@ -22,10 +24,22 @@ router.get('/', getBlog.getArticles);
 router.get('/:id', getBlog.getSingleArticle);
 
 /*
+ * PUT /blog/:blogId
+ * Edits a given blog article
+ */
+router.put('/:id', updateBlog.updateArticle);
+
+/*
  * POST /blog/create
  * Creates a new blog article
  */
 router.post('/create', createBlog.createBlogPost);
+
+/*
+ * DELETE /blog/create
+ * Deletes a given blog post
+ */
+router.delete('/:id', deleteBlog.deleteArticle);
 
 module.exports = router;
 
