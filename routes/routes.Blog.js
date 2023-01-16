@@ -7,13 +7,24 @@ const newPostController = require('../controller/controller.newPost');
 const authenticationMiddleware = require('../middleware/authMiddleware');
 const validateBlogpostMiddleware = require('../middleware/validateBlogPost');
 const createBlog = require('../controller/controller.createBlog');
+const getBlog = require('../controller/controller.getBlogArticle');
 
 /*
- * Get's the index page
+ * GET /blog
+ * Get's all articles posted from the database
  */
+router.get('/', getBlog.getArticles);
 
-router.get('/:id', indexController.getPostById);
+/*
+ * GET /blog/:blogId
+ * Get's all posts from the database with the given blog
+ */
+router.get('/:id', getBlog.getSingleArticle);
 
+/*
+ * POST /blog/create
+ * Creates a new blog article
+ */
 router.post('/create', createBlog.createBlogPost);
 
 module.exports = router;

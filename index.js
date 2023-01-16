@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 
 //app.use(express.static('public'));
 app.use(expressFileUpload());
-app.use('/posts/store', validateMiddleware);
+//app.use('/posts/store', validateMiddleware);
 // app.use(
 //   expressSession({
 //     secret: process.env.SECRET_KEY,
@@ -35,7 +35,7 @@ app.use('/posts/store', validateMiddleware);
 // );
 //flash middleware helps flush away error notifications at the end of every request live-
 //cyle, whenever the user re-visits the form after a successful submission
-app.use(flash());
+//app.use(flash());
 
 //app.set('view engine', 'ejs');
 
@@ -74,8 +74,11 @@ app.use((err, req, res, next) => {
   res.locals.error = req.app.get('env') == 'development' ? err : {};
 
   //render the error page
-  res.status(err.status || 500);
-  res.render('notfound');
+  res.status(err.status || 404);
+  res.json({
+    statsCode: 404,
+    message: 'Page not found',
+  });
 });
 
 app.listen(port, (req, res) => {
