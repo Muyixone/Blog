@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const indexController = require('../controller/controller.index');
-const aboutController = require('../controller/controller.about');
-const newPostController = require('../controller/controller.newPost');
-const authenticationMiddleware = require('../middleware/authMiddleware');
-const validateBlogpostMiddleware = require('../middleware/validateBlogPost');
+require('dotenv').config();
+
 const createBlog = require('../controller/controller.createBlog');
 const getBlog = require('../controller/controller.getBlogArticle');
 const updateBlog = require('../controller/controller.updateBlog');
 const deleteBlog = require('../controller/controller.deleteBlog');
+const authenticateMW = require('../middleware/authenticateMw');
 
 /*
  * GET /blog
@@ -26,8 +24,9 @@ router.get('/:id', getBlog.getSingleArticle);
 /*
  * PUT /blog/:blogId
  * Edits a given blog article
+ * Protected route
  */
-router.put('/:id', updateBlog.updateArticle);
+router.put('/:id', authenticateMW, updateBlog.updateArticle);
 
 /*
  * POST /blog/create

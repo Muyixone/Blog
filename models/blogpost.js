@@ -7,7 +7,7 @@ const BlogPostSchema = new Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
-    tags: String,
+    tags: { type: [String] },
     author: {
       type: String,
       required: true,
