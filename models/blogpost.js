@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./userModel');
+const aggregatePaginate = require('mongoose-paginate-v2');
 
 const Schema = mongoose.Schema;
 
@@ -9,8 +9,9 @@ const BlogPostSchema = new Schema(
     description: { type: String, required: true },
     tags: { type: [String] },
     author: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: 'User',
     },
     state: ['draft', 'published'],
     read_count: { type: Number },
@@ -21,6 +22,6 @@ const BlogPostSchema = new Schema(
   },
   { timestamp: true }
 );
-
+BlogPostSchema.plugin(aggregatePaginate);
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);
 module.exports = BlogPost;
