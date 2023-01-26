@@ -28,8 +28,7 @@ module.exports = async (req, res, next) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
   // Save the token to the cookie for accessibility from the browser
-  // res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 });
-
+  //res.cookie('jwt', token, { httpOnly: true, maxAge: 1000 * 60 * 60 })
   res.json({
     message: `Welcome back ${userWithEmail.firstname}`,
     token: token,

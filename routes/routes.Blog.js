@@ -32,7 +32,7 @@ router.put('/:id', authenticateMW, updateBlog.updateArticle);
  * POST /blog/create
  * Creates a new blog article
  */
-router.post('/create', createBlog.createBlogPost);
+router.post('/create', authenticateMW, createBlog.createBlogPost);
 
 /*
  * DELETE /blog/create
