@@ -1,63 +1,100 @@
 const blogModel = require('../models/blogpost');
+const User = require('../models/userModel');
+const dayjs = require('dayjs');
+const mongoose = require('mongoose');
 
-exports.getArticles = async (req, res, next) => {
-  let aggregateOptions = [];
+exports.getArticles = async (req, res) => {
+  //Populate/lookup the author field froom the user collection
+  let query = [
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'author',
+        foreignField: '_id',
+        as: 'author',
+      },
+    },
+    { $unwind: '$author' },
+  ];
 
+  //Filter and Search by title and author's first or last name
+  if (req.query.keyword && req.query.keyword != '') {
+    query.push({
+      $match: {
+        $or: [
+          {
+            title: { $regex: req.query.keyword, $options: 'i' },
+          },
+          {
+            'author.firstname': { $regex: req.query.keyword, $options: 'i' },
+          },
+          { 'author.lastname': { $regex: req.query.keyword, $options: 'i' } },
+        ],
+      },
+    });
+  }
+
+  //Filer and search by tags
+  if (req.query.tags) {
+    query.push({
+      $match: { tags: { $regex: req.query.tags, $options: 'i' } },
+    });
+  }
+
+  //Count the total number of documents in the collection
+  let total = await blogModel.countDocuments(query);
   // PAGINATION
   let page = parseInt(req.query.page) || 1;
   let limit = parseInt(req.query.limit) || 20;
+  let skip = (page - 1) * limit;
   //set the options for pagination
-  const options = {
-    page,
-    limit,
-    collation: { locale: 'en' },
-    customLabels: {
-      totalDocs: 'totalResults',
-      docs: 'events',
-    },
-  };
 
-  // FILTERING AND TEXT SEARCH -- FIRST STAGE
-  let match = {};
+  query.push({ $skip: skip });
+  query.push({ $limit: limit });
+
+  // Remove the _id, email and password fields from the final document to be displayed
+  query.push({
+    $project: {
+      'author._id': 0,
+      'author.email': 0,
+      'author.password': 0,
+    },
+  });
+
+  let blogs = await blogModel.aggregate(query);
+  res.status(200).json({
+    message: 'Success',
+    data: {
+      blogs,
+      options: {
+        total,
+        currentPage: page,
+        perPage: limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    },
+  });
+
+  // FILTERING AND TEXT SEARCH -- FIRS T STAGE
+  //let query = {};
+  // if (req.query.author) {
+  //   query.author = req.query.author;
+  // }
+  // if (req.query.keyword) {
+  //   query.$or = [
+  //     { title: { $regex: req.query.keyword, $options: 'i' } },
+  //     { tags: { $regex: req.query.keyword, $options: 'i' } },
+  //   ];
+  // }
+
+  // let blog = await blogModel.find(query).populate('author', 'firstname');
+
+  // return res.status(200).json({
+  //   messaged: 'Success',
+  //   data: blog,
+  // });
 
   //filter by author's name -
-  //using $regex in mongodb the 'i' flag is added to make the search case-insensitive
-  if (req.query.q) {
-    match.author = { $regex: req.query.q, $options: 'i' };
-  }
-
-  //filter by tags
-  if (req.query.tags) {
-    match.tags = { tags: req.query.tags };
-  }
-
-  //filter by title
-  if (req.query.title) {
-    match.title = { title: req.query.title };
-  }
-
-  //Push the filtered results into the aggregateOptions object
-  aggregateOptions.push({ $match: match });
-
-  //GROUPING BY READ_COUNT, READ_TIME, AND TIME_STAMP -- SECOND STAGE
-
-  // SORTING -- THIRD STAGE
-  let sortOrder =
-    req.query.sortOrder && req.query.sortOrder === 'desc' ? -1 : 1;
-  aggregateOptions.push({ $sort: { datePosted: sortOrder } });
-
-  // Set up the aggregation
-  const myAggregation = blogModel.aggregate(aggregateOptions);
-  const results = await blogModel.paginate(myAggregation, options);
-  res.status(200).json(results);
-
-  //Find all posts and sort them by datePosted from the most recent
-  // const article = await blogModel.find({}).sort({ datePosted: 'desc' });
-  // return res.status(200).json({
-  //   statusCode: 200,
-  //   message: 'Fetch articles successfully',
-  //   data: { article },
-  // });
 };
 
 exports.getSingleArticle = async (req, res, next) => {
