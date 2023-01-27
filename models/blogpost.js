@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const BlogPostSchema = new Schema(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     tags: { type: [String] },
     author: {
@@ -17,10 +17,9 @@ const BlogPostSchema = new Schema(
     read_count: { type: Number },
     reading_time: { type: String },
     body: String,
-    datePosted: { type: Date },
     // image: { type: String },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 // BlogPostSchema.plugin(aggregatePaginate);
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);

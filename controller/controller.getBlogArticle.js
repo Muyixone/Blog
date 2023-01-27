@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 
 exports.getArticles = async (req, res) => {
   //Populate/lookup the author field froom the user collection
+  //The result will be an array of author, and because the $concat method
+  // can not work on arrays, we use the $unwind method to convert to a string
   let query = [
     {
       $lookup: {
@@ -17,25 +19,31 @@ exports.getArticles = async (req, res) => {
     { $unwind: '$author' },
   ];
 
-  //Filter and Search by title and author's first or last name
-  if (req.query.keyword && req.query.keyword != '') {
+  //Filter and Search by title
+  if (req.query.title && req.query.title != '') {
+    query.push({
+      $match: {
+        title: { $regex: req.query.title, $options: 'i' },
+      },
+    });
+  }
+
+  //Filter By author's name
+  if (req.query.author && req.query.author != '') {
     query.push({
       $match: {
         $or: [
           {
-            title: { $regex: req.query.keyword, $options: 'i' },
+            'author.firstname': { $regex: req.query.author, $options: 'i' },
           },
-          {
-            'author.firstname': { $regex: req.query.keyword, $options: 'i' },
-          },
-          { 'author.lastname': { $regex: req.query.keyword, $options: 'i' } },
+          { 'author.lastname': { $regex: req.query.author, $options: 'i' } },
         ],
       },
     });
   }
 
   //Filer and search by tags
-  if (req.query.tags) {
+  if (req.query.tags && req.query.tags != '') {
     query.push({
       $match: { tags: { $regex: req.query.tags, $options: 'i' } },
     });
@@ -53,13 +61,36 @@ exports.getArticles = async (req, res) => {
   query.push({ $limit: limit });
 
   // Remove the _id, email and password fields from the final document to be displayed
+  // Concat the author object into one whole string object
   query.push({
     $project: {
-      'author._id': 0,
-      'author.email': 0,
-      'author.password': 0,
+      author: { $concat: ['$author.firstname', ' ', '$author.lastname'] },
+      title: 1,
+      description: 1,
+      tags: 1,
+      state: 1,
+      reading_time: 1,
+      body: 1,
+      createdAt: 1,
+      updatedAt: 1,
     },
   });
+
+  //Sort the document by any of the fields specified
+  //check if the query parameters === sortBy and sortOrder
+  //if true, return the document in ascending order of the specified field
+  //else the defualt order will be in descending order of the createdAt field
+  if (req.query.sortBy && req.query.sortOrder) {
+    var sort = {};
+    sort[req.query.sortBy] = req.query.sortOrder == 'asc' ? 1 : -1;
+    query.push({
+      $sort: sort,
+    });
+  } else {
+    query.push({
+      $sort: { createdAt: -1 },
+    });
+  }
 
   let blogs = await blogModel.aggregate(query);
   res.status(200).json({

@@ -1,8 +1,10 @@
 const blogModel = require('../models/blogpost');
 
 exports.createBlogPost = async (req, res, next) => {
+  //Calculate the reading time of the blog post
   let { body } = req.body;
   const wordsPerMinute = 200;
+  //Eliminate whitespace
   const noOfWords = body.split(/\s+/).length;
   const minutes = noOfWords / wordsPerMinute;
   const estimatedReadTime = Math.ceil(minutes);
