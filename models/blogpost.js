@@ -14,7 +14,7 @@ const BlogPostSchema = new Schema(
       ref: 'User',
     },
     state: ['draft', 'published'],
-    read_count: { type: Number },
+    read_count: { type: Number, default: 0 },
     reading_time: { type: String },
     body: String,
     // image: { type: String },

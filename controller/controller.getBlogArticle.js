@@ -2,9 +2,10 @@ const blogModel = require('../models/blogpost');
 const User = require('../models/userModel');
 const dayjs = require('dayjs');
 const mongoose = require('mongoose');
+const { json } = require('body-parser');
 
 exports.getArticles = async (req, res) => {
-  //Populate/lookup the author field froom the user collection
+  //Populate/lookup the author field from the user collection in the db
   //The result will be an array of author, and because the $concat method
   // can not work on arrays, we use the $unwind method to convert to a string
   let query = [
@@ -61,7 +62,7 @@ exports.getArticles = async (req, res) => {
   query.push({ $limit: limit });
 
   // Remove the _id, email and password fields from the final document to be displayed
-  // Concat the author object into one whole string object
+  // Concat the author field into one whole string value
   query.push({
     $project: {
       author: { $concat: ['$author.firstname', ' ', '$author.lastname'] },
@@ -129,15 +130,11 @@ exports.getArticles = async (req, res) => {
 };
 
 exports.getSingleArticle = async (req, res, next) => {
-  const article = await blogModel
-    .findOne({ id: req.params.id })
-    .sort({ datePosted: 'desc' });
-
-  return res.status(200).json({
-    statusCode: 200,
-    message: 'Fetch single article successfully',
-    data: {
-      article: article || {},
-    },
+  let articles = await blogModel.findById(req.params.id);
+  articles.read_count += 1;
+  articles.save();
+  return res.json({
+    message: 'Article fetched successfully',
+    articles,
   });
 };
