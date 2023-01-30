@@ -3,6 +3,7 @@ const User = require('../models/userModel');
 const dayjs = require('dayjs');
 const mongoose = require('mongoose');
 const { json } = require('body-parser');
+const { fileLoader } = require('ejs');
 
 exports.getArticles = async (req, res) => {
   //Populate/lookup the author field from the user collection in the db

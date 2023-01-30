@@ -38,6 +38,6 @@ router.post('/create', authenticateMW, createBlog.createBlogPost);
  * DELETE /blog/create
  * Deletes a given blog post
  */
-router.delete('/:id', deleteBlog.deleteArticle);
+router.delete('/:id', authenticateMW, deleteBlog.deleteArticle);
 
 module.exports = router;
