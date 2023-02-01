@@ -22,6 +22,12 @@ router.get('/', getBlog.getArticles);
 router.get('/:id', getBlog.getSingleArticle);
 
 /*
+ * GET /blog/:userId
+ * Get's all posts from the database by the given user
+ */
+router.get('/userBlogs/:id', authenticateMW, getBlog.getAuthorArticles);
+
+/*
  * PUT /blog/:blogId
  * Edits a given blog article
  * Protected route

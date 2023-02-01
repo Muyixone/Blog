@@ -2,8 +2,6 @@ const blogModel = require('../models/blogpost');
 const User = require('../models/userModel');
 const dayjs = require('dayjs');
 const mongoose = require('mongoose');
-const { json } = require('body-parser');
-const { fileLoader } = require('ejs');
 
 exports.getArticles = async (req, res) => {
   //Populate/lookup the author field from the user collection in the db
@@ -63,7 +61,7 @@ exports.getArticles = async (req, res) => {
   query.push({ $limit: limit });
 
   // Remove the _id, email and password fields from the final document to be displayed
-  // Concat the author field into one whole string value
+  // Concatenate the author field into one whole string value
   query.push({
     $project: {
       author: { $concat: ['$author.firstname', ' ', '$author.lastname'] },
@@ -93,20 +91,26 @@ exports.getArticles = async (req, res) => {
       $sort: { createdAt: -1 },
     });
   }
-
-  let blogs = await blogModel.aggregate(query);
-  res.status(200).json({
-    message: 'Success',
-    data: {
-      blogs,
-      options: {
-        total,
-        currentPage: page,
-        perPage: limit,
-        totalPages: Math.ceil(total / limit),
+  try {
+    let blogs = await blogModel.aggregate(query);
+    res.status(200).json({
+      message: 'Success',
+      data: {
+        blogs,
+        options: {
+          total,
+          currentPage: page,
+          perPage: limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: error.message,
+      data: {},
+    });
+  }
 
   // FILTERING AND TEXT SEARCH -- FIRS T STAGE
   //let query = {};
@@ -131,11 +135,89 @@ exports.getArticles = async (req, res) => {
 };
 
 exports.getSingleArticle = async (req, res, next) => {
+  // Check if the id passed is valid mongoose id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({
+      message: 'Invalid blog id',
+      data: {},
+    });
+  }
   let articles = await blogModel.findById(req.params.id);
-  articles.read_count += 1;
-  articles.save();
-  return res.json({
-    message: 'Article fetched successfully',
-    articles,
-  });
+
+  if (!articles) {
+    return res.status(400).json({
+      message: 'Invalid blog id',
+      data: {},
+    });
+  }
+  try {
+    articles.read_count += 1;
+
+    articles.save();
+    return res.json({
+      message: 'Article fetched successfully',
+      articles,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: error.message,
+      data: {},
+    });
+  }
+};
+
+exports.getAuthorArticles = async (req, res, next) => {
+  let currentUser = req.user;
+  // let query = [
+  //   {
+  //     $lookup: {
+  //       from: 'users',
+  //       localField: 'author',
+  //       foreignField: '_id',
+  //       as: 'author',
+  //     },
+  //   },
+  //   { $unwind: '$author' },
+  // ];
+
+  console.log(blog.title);
+  try {
+    const allArticles = await blogModel.find({});
+    if (!allArticles) {
+      return res.status(404).json({
+        messge: 'No post for this id',
+      });
+    }
+
+    let blog = [];
+
+    allArticles.forEach((article) => {
+      if (article.author != currentUser.id) {
+        return;
+      }
+      blog.push(article);
+    });
+
+    // PAGINATION;
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    let skip = (page - 1) * limit;
+
+    blog.push({ skip: skip, limit: limit });
+    const total = await blogModel.estimatedDocumentCount(blog);
+    res.status(200).json({
+      message: 'Successfully fetched data',
+      data: {
+        blog,
+        options: {
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
 };

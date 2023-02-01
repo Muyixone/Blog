@@ -13,6 +13,8 @@ const passport = require('passport');
 const createBlogRoute = require('./routes/routes.Blog');
 const usersRoute = require('./routes/route.User');
 
+const connectToDb = require('./db');
+
 const logoutController = require('./controller/controller.logout');
 
 const app = express();
@@ -24,10 +26,10 @@ app.use(bodyParser.json());
 //app.use(express.static('public'));
 app.use(expressFileUpload());
 
-const port = 3333;
+const port = process.env.PORT;
 
-// === SET UP DATABASE
-mongoose.connect('mongodb://localhost:27017/Blog', { useNewUrlParser: true });
+// === CONNECT TO DATABASE
+connectToDb();
 
 //=== INITIALIZE PASSPORT MIDDLEWARE
 app.use(passport.initialize());
