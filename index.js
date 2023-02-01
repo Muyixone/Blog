@@ -26,10 +26,7 @@ app.use(bodyParser.json());
 //app.use(express.static('public'));
 app.use(expressFileUpload());
 
-const port = process.env.PORT;
-
-// === CONNECT TO DATABASE
-connectToDb();
+const PORT = process.env.PORT;
 
 //=== INITIALIZE PASSPORT MIDDLEWARE
 app.use(passport.initialize());
@@ -64,8 +61,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(port, (req, res) => {
-  console.log('Server connected on port', port);
+// CONNECT TO THE DB BEFORE LISTENING
+connectToDb().then(() => {
+  app.listen(PORT, () => {
+    console.log('listening for requests');
+  });
 });
 
 module.exports = app;
