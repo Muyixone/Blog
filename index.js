@@ -23,6 +23,8 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+connectToDb();
+
 //app.use(express.static('public'));
 app.use(expressFileUpload());
 
@@ -62,10 +64,9 @@ app.use((err, req, res, next) => {
 });
 
 // CONNECT TO THE DB BEFORE LISTENING
-connectToDb().then(() => {
-  app.listen(PORT, () => {
-    console.log('listening for requests');
-  });
+
+app.listen(PORT, () => {
+  console.log('listening for requests');
 });
 
 module.exports = app;
